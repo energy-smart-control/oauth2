@@ -254,8 +254,10 @@ func (m *Manager) getAndDelAuthorizationCode(ctx context.Context, tgr *oauth2.To
 		return nil, err
 	} else if ti.GetClientID() != tgr.ClientID {
 		return nil, errors.ErrInvalidAuthorizeCode
-	} else if codeURI := ti.GetRedirectURI(); codeURI != "" && codeURI != tgr.RedirectURI {
-		return nil, errors.ErrInvalidAuthorizeCode
+	} else if codeURI := ti.GetRedirectURI(); codeURI != "" {
+		if err := m.validateURI(codeURI, tgr.RedirectURI); err != nil {
+			return nil, err
+		}
 	}
 
 	err = m.delAuthorizationCode(ctx, code)
